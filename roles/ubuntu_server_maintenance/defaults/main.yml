@@ -1,0 +1,40 @@
+# Список пакетов для установки
+ubuntu_packages:
+  - curl
+  - htop
+  - vim
+  - ufw
+
+# Список пакетов для удаления
+ubuntu_packages_to_remove:
+  - telnet
+  - ftp
+
+# Список служб для управления
+ubuntu_services:
+  - name: ssh
+    state: started
+    enabled: yes
+  - name: ufw
+    state: started
+    enabled: yes
+
+# Пользователи для создания
+ubuntu_users:
+  - name: admin
+    password: "12345"
+    sudo: yes
+  - name: deploy
+    password: "12345"
+    sudo: no
+
+# SSH-ключи для добавления
+ssh_keys:
+  - "ssh-rsa AAAAB3NzaC1yc2E... admin@host"
+  - "ssh-rsa AAAAB3NzaC1yc2E... user2@host"
+
+# Настройки SSH
+ssh_config:
+  PermitRootLogin: yes
+  PasswordAuthentication: no
+  Port: 22

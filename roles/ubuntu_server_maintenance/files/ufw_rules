@@ -1,0 +1,4 @@
+allow 22/tcp
+allow 80/tcp
+allow 443/tcp
+deny from 192.168.1.0/24

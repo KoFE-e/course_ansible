@@ -1,0 +1,80 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  tags:
+    - update_cache
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ubuntu_packages }}"
+  tags:
+    - install_packages
+
+- name: Remove packages
+  apt:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ ubuntu_packages_to_remove }}"
+  tags:
+    - remove_packages
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+  tags:
+    - upgrade_all_packages
+
+- name: Ensure services are managed
+  systemd:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  loop: "{{ ubuntu_services }}"
+  tags:
+    - manage_services
+
+- name: Create users
+  user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | password_hash('sha512') }}"
+    shell: /bin/bash
+  loop: "{{ ubuntu_users }}"
+  tags:
+    - create_users
+
+- name: Configure sudo for users
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ item.name }} ALL=(ALL) NOPASSWD:ALL"
+    state: present
+  when: item.sudo
+  loop: "{{ ubuntu_users }}"
+  tags:
+    - configure_sudo
+
+- name: Add SSH keys
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.key }}"
+  loop: "{{ ssh_keys }}"
+  tags:
+    - add_ssh_keys
+
+- name: Configure UFW
+  ufw:
+    rule: "{{ item.rule }}"
+    name: "{{ item.name }}"
+    port: "{{ item.port }}"
+  loop: "{{ ufw_rules }}"
+  tags:
+    - configure_ufw
+
+- name: Configure SSH
+  template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+  notify: Restart SSH
+  tags:
+    - change_sshd_config
