@@ -1,0 +1,72 @@
+- name: Install PostgreSQL
+  apt:
+    name: "postgresql"
+    state: present
+  tags:
+    - install_postgresql
+
+- name: Ensure PostgreSQL service is running
+  systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  tags:
+    - manage_services
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
+  notify: Restart PostgreSQL
+  tags:
+    - configure_postgresql
+
+- name: Install psycopg2 via apt
+  apt:
+    name: python3-psycopg2
+    state: present
+  become: yes
+  tags:
+    - install_dependencies
+
+- name: Create PostgreSQL users
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    role_attr_flags: "{{ 'SUPERUSER' if item.superuser else 'LOGIN' }}"
+  loop: "{{ postgresql_users }}"
+  become: yes
+  become_user: postgres
+  tags:
+    - manage_users
+
+- name: Create PostgreSQL databases
+  postgresql_db:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner }}"
+  loop: "{{ postgresql_databases }}"
+  become: yes
+  become_user: postgres
+  tags:
+    - manage_databases
+
+- name: Grant database permissions to users
+  postgresql_privs:
+    database: "{{ item.database }}"
+    roles: "{{ item.roles }}"
+    privs: "{{ 'ALL' if not item.readonly else 'SELECT' }}"
+    type: table
+  loop: "{{ postgresql_users }}"
+  become: yes
+  become_user: postgres
+  when: item.databases is defined
+  tags:
+    - manage_permissions
+
+- name: Create PostgreSQL backups
+  shell: pg_dump -d {{ item.name }} > /tmp/{{ item.name }}.sql
+  loop: "{{ postgresql_databases }}"
+  become: yes
+  become_user: postgres
+  tags:
+    - manage_backups

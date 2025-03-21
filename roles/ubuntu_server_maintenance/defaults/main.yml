@@ -1,9 +1,6 @@
 # Список пакетов для установки
 ubuntu_packages:
-  - curl
-  - htop
-  - vim
-  - ufw
+  - python3-pip
 
 # Список пакетов для удаления
 ubuntu_packages_to_remove:

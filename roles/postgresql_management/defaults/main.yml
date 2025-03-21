@@ -1,0 +1,28 @@
+# Список пользователей PostgreSQL
+postgresql_users:
+  - name: admin
+    password: "12345"
+    superuser: yes
+    databases: [mydb]
+  - name: readonly
+    password: "12345"
+    databases: [mydb]
+    superuser: no
+    readonly: yes
+
+# Список баз данных
+postgresql_databases:
+  - name: mydb
+    owner: admin
+
+# Настройки pg_hba.conf
+pg_hba_config:
+  - type: local
+    database: all
+    user: all
+    method: peer
+  - type: host
+    database: all
+    user: all
+    address: 192.168.1.0/24
+    method: md5
