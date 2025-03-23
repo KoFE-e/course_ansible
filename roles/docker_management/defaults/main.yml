@@ -1,0 +1,19 @@
+# Список контейнеров для управления
+docker_containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - /var/www:/usr/share/nginx/html
+  - name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+# Настройки Docker Daemon
+docker_daemon_config:
+  log_driver: "json-file"
+  log_opts:
+    max_size: "10m"
+    max_file: "3"

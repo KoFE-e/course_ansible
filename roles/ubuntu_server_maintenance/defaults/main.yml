@@ -9,10 +9,13 @@ ubuntu_packages_to_remove:
 
 # Список служб для управления
 ubuntu_services:
-  - name: ssh
-    state: started
-    enabled: yes
-  - name: ufw
+  # - name: ssh
+  #   state: started
+  #   enabled: yes
+  # - name: ufw
+  #   state: started
+  #   enabled: yes
+  - name: postgresql
     state: started
     enabled: yes
 
